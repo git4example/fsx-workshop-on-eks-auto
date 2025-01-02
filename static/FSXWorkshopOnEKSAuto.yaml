@@ -2321,7 +2321,7 @@ Resources:
                   mkdir -p /home/${VSCodeUser}/environment/eks-fsx-workshop
                   chmod -R 777 /home/${VSCodeUser}/environment/eks-fsx-workshop 
                   # git clone https://github.com/aws-samples/eks-fsx-workshop /home/${VSCodeUser}/environment/eks-fsx-workshop  
-                  git clone https://github.com/git4example/eks-fsx-workshop /home/${VSCodeUser}/environment/eks-fsx-workshop
+                  git clone https://github.com/git4example/fsx-workshop-on-eks-auto /home/${VSCodeUser}/environment/eks-fsx-workshop
                   chown -R ${VSCodeUser}:${VSCodeUser} /home/${VSCodeUser}/environment/eks-fsx-workshop
   
   RunCreatePrimaryEKSCluster:
