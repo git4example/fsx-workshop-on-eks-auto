@@ -2735,29 +2735,22 @@ Resources:
                 # Security Group for Lustre
                 STACK_NAME="FSxL-SecurityGroup-01"
                 REGION={{ PrimaryRegion }}
-                
+                VPC_ID={{ VPCIdentifier }}
+
                 cd /home/${VSCodeUser}/environment/eks-fsx-workshop/static/FSxCFN
                 
-                echo "Creating Security Group for FSx for Lustre"
-                
-                # Backup original file
-                cp fsxL-SecurityGroup.yaml fsxL-SecurityGroup.yaml.bak
-                
-                # Replace VPC identifier
-                sed -i "s/myVpc/{{ VPCIdentifier }}/g" fsxL-SecurityGroup.yaml
-                
+                echo "Creating Security Group for FSx for Lustre in VPC $VPC_ID"
+                                
                 # Create CloudFormation stack
                 aws cloudformation create-stack \
                   --stack-name $STACK_NAME \
                   --region $REGION \
                   --template-body file://./fsxL-SecurityGroup.yaml \
-                  --parameters ParameterKey=SecurityGroupName,ParameterValue=FSxLSecurityGroup01 \
+                  --parameters \
+                  ParameterKey=VpcId,ParameterValue=$VPC_ID \
+                  ParameterKey=SecurityGroupName,ParameterValue=FSxLSecurityGroup01 \
                   --capabilities CAPABILITY_NAMED_IAM 
                 
-                # Clean up
-                rm -f fsxL-SecurityGroup.yaml
-                mv fsxL-SecurityGroup.yaml.bak fsxL-SecurityGroup.yaml
-
   DeleteFSxLustreSecurityGroup:
     Type: AWS::SSM::Document
     Properties:
@@ -2885,30 +2878,23 @@ Resources:
                 
                 STACK_NAME="fsxZ-SecurityGroup"
                 REGION={{ PrimaryRegion }}
+                VPC_ID={{ VPCIdentifier }}
                 
                 cd /home/${VSCodeUser}/environment/eks-fsx-workshop/static/FSxCFN
                 
                 # Security Group for OpenZFS
-                echo "Creating Security Group for FSx for OpenZFS"
-                
-                # Backup original file
-                cp fsxZ-SecurityGroup.yaml fsxZ-SecurityGroup.yaml.bak
-                
-                # Replace VPC identifier
-                sed -i "s/myVpc/{{ VPCIdentifier }}/g" fsxZ-SecurityGroup.yaml
-                
+                echo "Creating Security Group for FSx for OpenZFS in VPC $VPC_ID"
+                                              
                 # Create CloudFormation stack
                 aws cloudformation create-stack \
                   --stack-name $STACK_NAME \
                   --region $REGION \
                   --template-body file://./fsxZ-SecurityGroup.yaml \
-                  --parameters ParameterKey=SecurityGroupName,ParameterValue=FSxZSecurityGroup \
+                  --parameters \
+                  ParameterKey=VpcId,ParameterValue=$VPC_ID \
+                  ParameterKey=SecurityGroupName,ParameterValue=FSxZSecurityGroup \
                   --capabilities CAPABILITY_NAMED_IAM 
-                
-                # Clean up
-                rm -f fsxZ-SecurityGroup.yaml
-                mv fsxZ-SecurityGroup.yaml.bak fsxZ-SecurityGroup.yaml
-  
+                  
   DeleteFSxOpenZFSSecurityGroup:
     Type: AWS::SSM::Document
     Properties:
@@ -3076,19 +3062,18 @@ Resources:
                 # Get VPC ID from EKS cluster
                 VPC_ID=$(aws eks describe-cluster --name $CLUSTER_NAME --region "$REGION" --query "cluster.resourcesVpcConfig.vpcId" --output text)
                 
-                echo "Creating Security Groups for FSx for Lustre in region $REGION"
+                echo "Creating Security Groups for FSx for Lustre in region $REGION in VPC $VPC_ID"
                 
                 cd /home/${VSCodeUser}/environment/eks-fsx-workshop/static/FSxCFN
-                
-                # Replace VPC ID in the template
-                sed -i "s/myVpc/$VPC_ID/g" fsxL-SecurityGroup.yaml
-                
+                                
                 # Create CloudFormation stack
                 aws cloudformation create-stack \
                   --stack-name "$STACK_NAME" \
                   --region "$REGION" \
                   --template-body file://./fsxL-SecurityGroup.yaml \
-                  --parameters ParameterKey=SecurityGroupName,ParameterValue=FSxLSecurityGroup02 \
+                  --parameters \
+                  ParameterKey=VpcId,ParameterValue=$VPC_ID \
+                  ParameterKey=SecurityGroupName,ParameterValue=FSxLSecurityGroup02 \
                   --capabilities CAPABILITY_NAMED_IAM
                 
                 echo "Security group creation initiated for FSx for Lustre in $REGION"
