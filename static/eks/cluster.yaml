@@ -1,0 +1,32 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: FSx-eks-cluster
+  region: primary-region
+  version: "1.31"
+vpc:
+  id: vpc-id #replace with your vpcId
+  clusterEndpoints:
+    privateAccess: false
+    publicAccess: true # Create the EKS control planes in the public subnets
+  subnets:
+    public: # Create the EKS control planes in the public subnets
+      ap-southeast-2a: { id: public-subnet-1 } #replace with your subnetid
+      ap-southeast-2b: { id: public-subnet-2 }
+iam:
+  withOIDC: true
+addons:
+  - name: eks-pod-identity-agent # no version is specified so it deploys the default version
+autoModeConfig:
+  # defaults to false
+  enabled: true
+  # optional, defaults to [general-purpose, system].
+  # suggested to leave unspecified
+  # To disable creation of nodePools, set it to the empty array ([]).
+  # nodePools: []string
+  # optional, eksctl creates a new role if this is not supplied
+  # and nodePools are present.
+  # nodeRoleARN: string
+cloudWatch:
+  clusterLogging:
+    enableTypes: ["all"]
