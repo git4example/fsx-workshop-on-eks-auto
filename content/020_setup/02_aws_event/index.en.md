@@ -92,10 +92,10 @@ export SECONDARY_CLUSTER_NAME=FSx-eks-cluster02
 - Check if region and cluster names are set correctly
 
 :::code[]{language=bash showLineNumbers=true showCopyAction=true}
-echo $PRIMARY_REGION
-echo $SECONDARY_REGION
-echo $PRIMARY_CLUSTER_NAME
-echo $SECONDARY_CLUSTER_NAME
+echo "PRIMARY_REGION        :" $PRIMARY_REGION
+echo "SECONDARY_REGION      :" $SECONDARY_REGION
+echo "PRIMARY_CLUSTER_NAME  :" $PRIMARY_CLUSTER_NAME
+echo "SECONDARY_CLUSTER_NAME:" $SECONDARY_CLUSTER_NAME
 :::
 
 ## Update the kube-config file:
@@ -105,14 +105,10 @@ Before you can start running all the Kubernetes commands included in this worksh
 
 
 ## Query the Amazon EKS cluster:
-Run the command below to see the Kubernetes nodes currently provisioned:
+Run the command below just to see the connectivity to EKS Auto Cluster:
 
 ::code[kubectl get nodes]{language=bash showLineNumbers=false showCopyAction=true}
 
-You should see two nodes provisioned (which are the on-demand nodes used by the Kubernetes controllers), such as the output below:
-
-
-![get-nodes](/static/images/get-nodes.png)
-
+Initially there will be no nodes in the cluster. As you start creating pods, EKS Auto will auto provision worker nodes as per workload demands. 
 
 You now have a VSCode IDE Server environment set-up ready to use your Amazon EKS Cluster! You may now proceed with the next step.

@@ -20,43 +20,52 @@ For this walkthrough, you should have the following prerequisites:
 
 You can find the CloudFormation template and relevant code in this GitHub repo. Run the following command to clone the repository into your local workstation.
 
-::code[git clone https://github.com/aws-samples/eks-fsx-workshop.git]{language=bash showLineNumbers=false showCopyAction=true}
+```bash
+git clone https://github.com/git4example/fsx-workshop-on-eks-auto.git
+```
 
 There are two folders that you need to reference in the following steps, with the “eks” folder containing all manifests files related to the eks cluster resources and “FSxCFN” Cloudformation templates for spinning up the VPC, FSx File Systems, EKS Clusters ..etc.
-
-::code[cd eks-fsx-workshop]{language=bash showLineNumbers=false showCopyAction=true}
 
 ### Part 3 : Provision workshop resources
 
 #### Upload template to S3
 Upload AWS CloudFormation template to your bucket in order to validate template before stack creation. Please replace **YOUR_BUCKET_NAME** in following command.
 
-::code[export BUCKET_NAME=YOUR_BUCKET_NAME]{language=bash showLineNumbers=false showCopyAction=true}
+```bash
+ASSET_BUCKET=YOUR_BUCKET_NAME
+ASSET_BUCKET_PATH=fsx-workshop-on-eks-auto
+```
 
-::code[aws s3 cp ./static/FSXWorkshopOnEKS.yaml s3://$BUCKET_NAME/FSXWorkshopOnEKS.yaml]{language=bash showLineNumbers=false showCopyAction=true}
+```bash
+aws s3 sync ./fsx-workshop-on-eks-auto s3://${ASSET_BUCKET}/${ASSET_BUCKET_PATH}
+```
+
 
 #### Validate template
-::code[aws cloudformation validate-template --template-url https://$BUCKET_NAME.s3.amazonaws.com/FSXWorkshopOnEKS.yaml]{language=bash showLineNumbers=false showCopyAction=true}
+
+```bash
+aws cloudformation validate-template --template-url https://${ASSET_BUCKET}.s3.amazonaws.com/${ASSET_BUCKET_PATH}/static/FSXWorkshopOnEKS.yaml
+```
 
 #### Create stack
 
 Please make sure you replace **YOUR_PREFERED_PRIMARY_REGION** and **YOUR_PREFERED_SECONDARY_REGION** in following command.
 
 
-:::code[]{language=bash showLineNumbers=true showCopyAction=true}
+```bash
 export PRIMARY_REGION=YOUR_PREFERED_PRIMARY_REGION
 export SECONDARY_REGION=YOUR_PREFERED_SECONDARY_REGION
 STACK_NAME=FSXWorkshopOnEKS
 VSINSTANCE_NAME=VSCodeServerForEKS
 ASSET_BUCKET_ZIPPATH=""
-:::
+```
 
 This may take upto 60 mins : 
 
-:::code[]{language=bash showLineNumbers=true showCopyAction=true}
+```bash
 aws cloudformation create-stack \
   --stack-name ${STACK_NAME} \
-  --template-url https://$BUCKET_NAME.s3.amazonaws.com/FSXWorkshopOnEKS.yaml \
+  --template-url https://${ASSET_BUCKET}.s3.amazonaws.com/${ASSET_BUCKET_PATH}/static/FSXWorkshopOnEKS.yaml \
   --region $PRIMARY_REGION \
   --parameters \
   ParameterKey=VSCodeUser,ParameterValue=participant \
@@ -67,15 +76,13 @@ aws cloudformation create-stack \
   ParameterKey=HomeFolder,ParameterValue=environment \
   ParameterKey=DevServerPort,ParameterValue=8081 \
   ParameterKey=AssetZipS3Path,ParameterValue=${ASSET_BUCKET_ZIPPATH} \
-  ParameterKey=BranchZipS3Path,ParameterValue="" \
-  ParameterKey=FolderZipS3Path,ParameterValue="" \
   ParameterKey=SecondaryRegion,ParameterValue=${SECONDARY_REGION} \
   --disable-rollback \
   --capabilities CAPABILITY_NAMED_IAM
 
 # Wait for stack creation to complete
 aws cloudformation wait stack-create-complete --stack-name ${STACK_NAME} --region PRIMARY_REGION
-:::
+```
 
 ### Part 4 : Access your workshop
 
@@ -85,7 +92,7 @@ Ref : [code-server](https://github.com/coder/code-server)
 
 You will be using the Open source VSCode IDE terminal to copy and paste commands that are provided in this workshop. 
 
-::alert[Note: Please use google chrome browser for best user experience. Firefox may experience some issues while copy-paste commands.]{header="Important" type="warning"}
+### Note: Please use google chrome browser for best user experience. Firefox may experience some issues while copy-paste commands.
 
 1. Go to Cloud formation console [link](https://console.aws.amazon.com/cloudformation) and select `genaifsxworkshoponeks` stack 
 2. Go to Stack **Outputs**
@@ -103,44 +110,42 @@ You will be using the Open source VSCode IDE terminal to copy and paste commands
 
 ![maximize](/static/images/maximize.png)
 
-:::alert{header="Note" type="info"}
-When you first time copy-paste a command on VSCode IDE, your browser may ask you to allow permission to see informaiton on clipboard. Please select **"Allow"**.
+### Note: When you first time copy-paste a command on VSCode IDE, your browser may ask you to allow permission to see informaiton on clipboard. Please select **"Allow"**.
 
 ![allow-clipboard](/static/images/allow-clipboard.png)
-:::
+
 
 - Set cluster variables : 
 
-:::code[]{language=bash showLineNumbers=true showCopyAction=true}
+```bash
 export PRIMARY_CLUSTER_NAME=FSx-eks-cluster
 export SECONDARY_CLUSTER_NAME=FSx-eks-cluster02
-:::
+```
 
 - Check if region and cluster names are set correctly
 
-:::code[]{language=bash showLineNumbers=true showCopyAction=true}
-echo $PRIMARY_REGION
-echo $SECONDARY_REGION
-echo $PRIMARY_CLUSTER_NAME
-echo $SECONDARY_CLUSTER_NAME
-:::
+```bash
+echo "PRIMARY_REGION        :" $PRIMARY_REGION
+echo "SECONDARY_REGION      :" $SECONDARY_REGION
+echo "PRIMARY_CLUSTER_NAME  :" $PRIMARY_CLUSTER_NAME
+echo "SECONDARY_CLUSTER_NAME:" $SECONDARY_CLUSTER_NAME
+```
 
 ## Update the kube-config file:
 Before you can start running all the Kubernetes commands included in this workshop, you need to update the kube-config file with the proper credentials to access the cluster. To do so, in your VSCode IDE terminal run the below command:
 
-::code[aws eks update-kubeconfig --name $PRIMARY_CLUSTER_NAME --region $PRIMARY_REGION]{language=bash showLineNumbers=false showCopyAction=true}
+```bash
+aws eks update-kubeconfig --name $PRIMARY_CLUSTER_NAME --region $PRIMARY_REGION
+```
 
 
 ## Query the Amazon EKS cluster:
-Run the command below to see the Kubernetes nodes currently provisioned:
+Run the command below just to see the connectivity to EKS Auto Cluster:
 
-::code[kubectl get nodes]{language=bash showLineNumbers=false showCopyAction=true}
-
-You should see two nodes provisioned (which are the on-demand nodes used by the Kubernetes controllers), such as the output below:
-
-
-![get-nodes](/static/images/get-nodes.png)
-
+```bash
+kubectl get nodes
+```
+Initially there will be no nodes in the cluster. As you start creating pods, EKS Auto will auto provision worker nodes as per workload demands. 
 
 You now have a VSCode IDE Server environment set-up ready to use your Amazon EKS Cluster! You may now proceed with the next step.
 
@@ -151,10 +156,10 @@ Once you finish with workshop and ready to clean up, visit this page to execute 
 ### Part 5 : Clean up
 This may take upto 30 mins : 
 
-:::code[]{language=bash showLineNumbers=false showCopyAction=true}
+```bash
 aws cloudformation delete-stack --stack-name ${STACK_NAME} --region PRIMARY_REGION
 
 # Wait for stack deletion to complete
 aws cloudformation wait stack-delete-complete --stack-name ${STACK_NAME} --region PRIMARY_REGION
-:::
+```
 
